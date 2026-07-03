@@ -1,0 +1,9 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# 仮想環境
+.venv/
+
+# 生成物（ベクトルDB。スクリプトから再生成可能）
+joseito/joseito.db/
