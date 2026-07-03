@@ -29,7 +29,7 @@ passages = text_splitter.split_documents(docs)
 # Step3. パッセージのベクトル化（密ベクトル側）
 embeddings = get_embeddings()
 
-# Step4. 密ベクトル DB（FAISS）の作成・保存
+# Step4. 密ベクトル DB（FAISS）の作成と保存
 db = FAISS.from_documents(passages, embeddings)
 db.save_local('hourei/hourei.db')
 

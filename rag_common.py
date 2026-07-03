@@ -17,7 +17,7 @@ class E5Embeddings(HuggingFaceEmbeddings):
 
 
 def get_embeddings():
-    """DB作成・検索で共通して使う埋め込みモデルを返す。"""
+    """DB の作成と検索で共通して使う埋め込みモデルを返す。"""
     return E5Embeddings(
         model_name = "intfloat/multilingual-e5-large",
         model_kwargs = {'device': 'mps'},
@@ -25,7 +25,7 @@ def get_embeddings():
 
 
 def load_db(db_path = 'joseito/joseito.db'):
-    """保存済みの FAISS DB を読み込んで返す。検索・QA で共通利用する。"""
+    """保存済みの FAISS DB を読み込んで返す。検索と QA で共通利用する。"""
     from langchain_community.vectorstores import FAISS
 
     return FAISS.load_local(
@@ -36,7 +36,7 @@ def load_db(db_path = 'joseito/joseito.db'):
 
 
 def get_llm():
-    """回答生成に使う Claude を返す。モデル名・パラメータをここに集約する。"""
+    """回答生成に使う Claude を返す。モデル名やパラメータをここに集約する。"""
     from dotenv import load_dotenv
     from langchain_anthropic import ChatAnthropic
 
@@ -55,11 +55,11 @@ _tokenizer = None
 
 
 def tokenize_ja(text):
-    """日本語文を分かち書きして単語リストにする（BM25 の索引・検索に使う）。
+    """日本語文を分かち書きして単語リストにする（BM25 の索引化と検索に使う）。
 
     BM25 は「単語の一致」で効くため、日本語では前段の分かち書き品質が肝になる。
     ここでは Sudachi の Mode C（できるだけ長い単位）を使い、「職務著作」「複製権」の
-    ような法律用語をなるべく1語として残す。空白・記号だけのトークンは落とす。
+    ような法律用語をなるべく1語として残す。空白や記号だけのトークンは落とす。
     """
     global _tokenizer
     if _tokenizer is None:
