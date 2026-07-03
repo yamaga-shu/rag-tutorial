@@ -1,18 +1,9 @@
 import sys
 
-from langchain_community.vectorstores import FAISS
+from rag_common import load_db
 
-from rag_common import get_embeddings
-
-# DB作成時と同じ埋め込みモデルを用意
-embeddings = get_embeddings()
-
-# 保存したDBを読み込む
-db = FAISS.load_local(
-    'joseito/joseito.db',
-    embeddings,
-    allow_dangerous_deserialization = True,  # 自分で作成したDBなので許可
-)
+# 保存したDBを読み込む（埋め込みモデルの用意も load_db が担う）
+db = load_db()
 
 # コマンドライン引数、なければ既定のクエリで検索
 query = sys.argv[1] if len(sys.argv) > 1 else "朝起きたときの気持ち"

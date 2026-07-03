@@ -22,3 +22,26 @@ def get_embeddings():
         model_name = "intfloat/multilingual-e5-large",
         model_kwargs = {'device': 'mps'},
     )
+
+
+def load_db(db_path = 'joseito/joseito.db'):
+    """保存済みの FAISS DB を読み込んで返す。検索・QA で共通利用する。"""
+    from langchain_community.vectorstores import FAISS
+
+    return FAISS.load_local(
+        db_path,
+        get_embeddings(),
+        allow_dangerous_deserialization = True,  # 自分で作成したDBなので許可
+    )
+
+
+def get_llm():
+    """回答生成に使う Claude を返す。モデル名・パラメータをここに集約する。"""
+    from dotenv import load_dotenv
+    from langchain_anthropic import ChatAnthropic
+
+    load_dotenv()  # .env の ANTHROPIC_API_KEY を読み込む
+    return ChatAnthropic(
+        model = "claude-sonnet-5",
+        max_tokens = 1024,
+    )

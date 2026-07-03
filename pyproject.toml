@@ -1,0 +1,15 @@
+[project]
+name = "rag-tutorial"
+version = "0.1.0"
+description = "個人的な RAG 構築のためのチュートリアル"
+requires-python = ">=3.14"
+dependencies = [
+    "langchain-huggingface>=1.2.2",
+    "langchain-community>=0.4.2",
+    "langchain-text-splitters>=1.1.2",
+    "langchain-anthropic>=1.4.8",
+    "python-dotenv>=1.2.2",
+    "faiss-cpu>=1.14.3",
+    "sentence-transformers>=5.6.0",
+    "langchain-classic>=1.0.8",
+]
