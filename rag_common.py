@@ -75,6 +75,15 @@ def tokenize_ja(text):
     return words
 
 
+def build_dense_retriever(db_path, k = 4):
+    """密ベクトル(FAISS) だけを使う retriever を返す（ハイブリッドでない基準）。
+
+    wikipedia / joseito と同じ「密のみ」の構成。ハイブリッドとの比較用に、
+    build_hybrid_retriever と対になる形で切り出しておく。
+    """
+    return load_db(db_path).as_retriever(search_kwargs = {'k': k})
+
+
 def build_hybrid_retriever(db_path, passages_path, k = 4, weights = (0.5, 0.5)):
     """密ベクトル(FAISS) と 疎(BM25) を RRF で融合したハイブリッド retriever を返す。
 
