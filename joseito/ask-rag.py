@@ -1,4 +1,7 @@
-import sys
+import os, sys
+
+# リポジトリ直下を import パスに追加（共通モジュール rag_common を参照するため）
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_classic.chains.retrieval import create_retrieval_chain

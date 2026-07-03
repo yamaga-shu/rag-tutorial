@@ -1,3 +1,7 @@
+# リポジトリ直下を import パスに追加（共通モジュール rag_common を参照するため）
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # Step1. パッセージへの分解
 with open('joseito/joseito.txt', 'r', encoding='utf-8') as f:
     text = f.read()
