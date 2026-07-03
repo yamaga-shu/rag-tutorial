@@ -4,6 +4,8 @@
 
 分割 → e5 で埋め込み → FAISS → retriever → Claude という RAG の骨格は共通で、
 データ源（青空文庫の文学作品 / Wikipedia 記事）だけが異なる2つの例を収録している。
+さらに、密ベクトル検索に **BM25（日本語キーワード検索）を組み合わせたハイブリッド検索**の
+例（著作権法）も収録している。
 
 ## セットアップ
 
@@ -73,6 +75,46 @@ uv run python wikipedia/ask-rag.py "強化学習とは何ですか？"          
 
 > Wikimedia API は既定の User-Agent を 429（レート制限）で拒否するため、
 > `get-articles-from-wikipedia.py` 内で `wikipedia.set_user_agent(...)` を設定している。
+
+## hourei（著作権法を題材にしたハイブリッド検索 RAG）
+
+密ベクトル検索（e5 + FAISS）と **BM25（キーワード／字句一致）** を組み合わせ、両者の
+ランキングを **RRF（Reciprocal Rank Fusion）** で融合したハイブリッド検索の例。
+「私的使用のための複製」「職務著作」のような**法律用語の完全一致**が効く場面で、密ベクトル
+単独では取りこぼす条文を BM25 が拾い上げる様子を確認できる。
+
+```bash
+uv run python hourei/get-laws-from-egov.py                    # e-Gov 法令API から著作権法を取得 → hourei/hourei.jsonl（1行=1条）
+uv run python hourei/mk-rag-db-from-text.py                   # チャンク分割・埋め込み → hourei/hourei.db（密）+ hourei_passages.jsonl（BM25用）
+uv run python hourei/search-rag-db.py "私的使用のための複製"    # 密のみ / BM25のみ / ハイブリッド の3通りを並べて比較
+uv run python hourei/ask-rag.py "私的使用のための複製はどこまで認められますか？"   # ハイブリッド検索で Claude 質問応答（出典＝条番号付き）
+```
+
+`get-laws-from-egov.py` の引数は法令ID（省略時は著作権法 `345AC0000000048`）。
+
+日本語の BM25 は**分かち書き（トークナイズ）の品質**が肝になるため、`rag_common.py` の
+`tokenize_ja` で **Sudachi** を使って単語分割してから索引化している。密ベクトルの FAISS は
+永続化する一方、BM25 索引は軽いので `hourei_passages.jsonl`（分割済みチャンク）から検索時に
+組み立て直す。
+
+出力例（`search-rag-db.py "私的使用のための複製"` の抜粋）:
+
+```
+===== 密ベクトルのみ (e5+FAISS) =====
+[1] 著作権法 第三十条 （私的使用のための複製）
+[2] 著作権法 第四十二条 （立法又は行政の目的のための内部資料としての複製等）
+===== BM25 のみ (字句一致) =====
+[1] 著作権法 第三十条 （私的使用のための複製）
+[2] 著作権法 第百四条の二 （私的録音録画補償金を受ける権利の行使）
+===== ハイブリッド (RRF 融合) =====
+[1] 著作権法 第三十条 （私的使用のための複製）
+[2] 著作権法 第百四条の二 （私的録音録画補償金を受ける権利の行使）
+[3] 著作権法 第四十二条 （立法又は行政の目的のための内部資料としての複製等）
+```
+
+> e-Gov 法令API v2（`https://laws.e-gov.go.jp/api/2/law_data/{法令ID}?response_format=json`）を
+> 利用している。本文は `{tag, attr, children}` の入れ子ツリーで返るため、スクリプト側で
+> Article（条）ごとに走査して条番号・見出し・本文を取り出している。
 
 ## 参考
 - [LLMのファインチューニングとRAG ―チャットボット開発による実践―](https://www.amazon.co.jp/dp/B0D46V4B9W)

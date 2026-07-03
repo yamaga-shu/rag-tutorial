@@ -12,3 +12,6 @@ __pycache__/
 joseito/joseito.db/
 wikipedia/wikipedia.db/
 wikipedia/wikipedia.jsonl
+hourei/hourei.db/
+hourei/hourei.jsonl
+hourei/hourei_passages.jsonl
