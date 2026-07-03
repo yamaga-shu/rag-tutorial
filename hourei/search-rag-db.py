@@ -35,7 +35,10 @@ def show(label, retriever):
     print(f"\n===== {label} =====")
     for i, doc in enumerate(retriever.invoke(query), 1):
         m = doc.metadata
-        print(f"[{i}] {m.get('law','')} {m.get('article','')} {m.get('caption','')}")
+        # 出典は「条番号 見出し 項番号」まで示す（項ごとに分けたときは項番号が入る）。
+        cite = ' '.join(x for x in [m.get('law', ''), m.get('article', ''),
+                                    m.get('caption', ''), m.get('paragraph', '')] if x)
+        print(f"[{i}] {cite}")
         print("    " + doc.page_content[:60].replace("\n", "") + " …")
 
 

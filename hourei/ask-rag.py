@@ -43,5 +43,8 @@ print("-" * 40)
 print("参照した条文:")
 for i, doc in enumerate(result['context'], 1):
     m = doc.metadata
-    print(f"[{i}] 出典: {m.get('law','')} {m.get('article','')} {m.get('caption','')} ({m.get('source','')})")
+    # 出典は「条番号 見出し 項番号」まで示す（項ごとに分けたときは項番号が入る）。
+    cite = ' '.join(x for x in [m.get('law', ''), m.get('article', ''),
+                                m.get('caption', ''), m.get('paragraph', '')] if x)
+    print(f"[{i}] 出典: {cite} ({m.get('source', '')})")
     print(doc.page_content[:80].replace("\n", "") + " …")

@@ -10,7 +10,7 @@ from langchain_community.vectorstores import FAISS
 
 from rag_common import get_embeddings
 
-# Step1. 条文(JSONL)の読み込み。1行 = 1条。
+# Step1. 条文(JSONL)の読み込み。1行 = 1項（短い条は1条）。
 docs = []
 with open('hourei/hourei.jsonl', 'r', encoding='utf-8') as f:
     for line in f:
@@ -18,11 +18,14 @@ with open('hourei/hourei.jsonl', 'r', encoding='utf-8') as f:
         docs.append(Document(page_content = r['text'], metadata = r['metadata']))
 
 # Step2. パッセージへの分解。
-#   法令は「条」が自然な単位だが、定義規定など長い条は 500 字程度に再分割する。
-#   条のメタデータ(law/article/caption/source)は各チャンクに引き継がれる。
+#   取得段階で条・項の単位に整えてあるので、通常はそのまま1チャンクにする。
+#   まれに残る極端に長い項だけ、句点区切りで大きめに再分割する保険をかける。
+#   条・項のメタデータ(law/article/caption/paragraph/source)は各チャンクに引き継がれる。
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size = 500,    # チャンクの文字数
-    chunk_overlap = 50,  # チャンクオーバーラップの文字数
+    separators = ['\n', '。', '、', ''],  # 文の途中で割らないよう句読点を優先する
+    keep_separator = True,               # 区切りの句点を本文に残す
+    chunk_size = 1200,    # チャンクの文字数（大きめにして項をなるべく丸ごと残す）
+    chunk_overlap = 100,  # チャンクオーバーラップの文字数
 )
 passages = text_splitter.split_documents(docs)
 
@@ -39,5 +42,5 @@ with open('hourei/hourei_passages.jsonl', 'w', encoding='utf-8') as f:
     for p in passages:
         f.write(json.dumps({'text': p.page_content, 'metadata': p.metadata}, ensure_ascii=False) + '\n')
 
-print(f'{len(docs)} 条を {len(passages)} チャンクに分割し、'
+print(f'{len(docs)} レコードを {len(passages)} チャンクに分割し、'
       f'hourei/hourei.db（密）と hourei/hourei_passages.jsonl（BM25用）に保存しました。')
